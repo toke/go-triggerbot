@@ -8,7 +8,9 @@ Currently only text messages can be triggered.
 
 ## Compiling
 
-Run `go build -v .`
+[Download](https://golang.org/) and install it.
+In the Source code directory run: `go build -v .`
+Done - proceed withe Section Usage.
 
 ## Usage
 
@@ -31,4 +33,3 @@ trigger:
   - match: "[Dd]ie \d+ Freunde"
     text: "... und Timmy der Hund"
 ```
-
