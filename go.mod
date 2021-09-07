@@ -1,4 +1,4 @@
-module main
+module github.com/toke/go-triggerbot
 
 go 1.17
 
