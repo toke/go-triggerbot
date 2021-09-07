@@ -7,6 +7,6 @@ trigger:
   - match: "WTF?"
     text: "What the Fuck?"
   - match: "(?i)guten morgen"
-    text: "Lass mich weiterschlafen!"
+    text: "Nimm Dir nen Kaffee! ☕️"
   - match: "[Dd]ie \\d+ Freunde"
     text: "... und Timmy der Hund"

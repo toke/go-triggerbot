@@ -31,7 +31,7 @@ trigger:
     text: "What the Fuck?"
   - # Case insensitive Match
     match: "(?i)guten morgen"
-    text: "Lass mich weiterschlafen!"
+    text: "Nimm Dir nen Kaffee! ☕️"
   - # This will match "Die 5 Freunde" but not "Die fünf Freunde"
     match: "[Dd]ie \\d+ Freunde"
     text: "... und Timmy der Hund"
