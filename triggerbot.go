@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -33,8 +34,8 @@ func processError(err error) {
 	os.Exit(2)
 }
 
-func readFile(cfg *Config) {
-	f, err := os.Open("config.yaml")
+func readFile(cfg *Config, filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
 		processError(err)
 	}
@@ -50,7 +51,14 @@ func readFile(cfg *Config) {
 func main() {
 	var gossip []Gossip
 	var cfg Config
-	readFile(&cfg)
+
+	var fname string
+	flag.StringVar(&fname, "config", "config.yaml", "Configuration Filename")
+	debugPtr := flag.Bool("debug", false, "Debug Output")
+	flag.Parse()
+	fmt.Println("Loading config:", fname)
+
+	readFile(&cfg, fname)
 
 	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
@@ -58,11 +66,13 @@ func main() {
 	}
 
 	for k, _ := range cfg.Trigger {
-		log.Printf("Compile Trigger: \"%s\" \t \"%s\"", cfg.Trigger[k].Match, cfg.Trigger[k].Text)
+		if *debugPtr == true {
+			log.Printf("Compile Trigger: \"%s\" \t \"%s\"", cfg.Trigger[k].Match, cfg.Trigger[k].Text)
+		}
 		gossip = append(gossip, Gossip{match: *regexp.MustCompile(cfg.Trigger[k].Match), text: cfg.Trigger[k].Text})
 	}
 
-	bot.Debug = true
+	bot.Debug = *debugPtr
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -76,7 +86,7 @@ func main() {
 			continue
 		}
 
-		if bot.Debug == true {
+		if *debugPtr == true {
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		}
 		if update.Message.IsCommand() {
@@ -98,7 +108,9 @@ func main() {
 			for k, v := range gossip {
 
 				if gossip[k].match.MatchString(update.Message.Text) {
-					log.Printf("%s", v.text)
+					if *debugPtr == true {
+						log.Printf("%s", v.text)
+					}
 					msg.Text = v.text
 					if v.parseMode == "" {
 						msg.ParseMode = "markdown"
