@@ -20,16 +20,22 @@ A different name and location can be set via the command line parameter *-config
 Make sure to insert The Bot TOKEN into the config file. Use [@BotFather](https://telegram.me/BotFather) to create a bot
 and a TOKEN.
 
-```
+```yaml
 telegram:
   token: "YOUR BOTTOKEN"
   timeout: 60
 
 trigger:
-  - match: "WTF?"
+  - # A normal Case sensitive Match
+    match: "WTF?"
     text: "What the Fuck?"
-  - match: "(?i)guten morgen"
+  - # Case insensitive Match
+    match: "(?i)guten morgen"
     text: "Lass mich weiterschlafen!"
-  - match: "[Dd]ie \d+ Freunde"
+  - # This will match "Die 5 Freunde" but not "Die fünf Freunde"
+    match: "[Dd]ie \d+ Freunde"
     text: "... und Timmy der Hund"
 ```
+*NOTE:* The Configuration file uses YAML as format.
+Indentation matters!
+Also make sure not to mix Tabs and Spaces when doing indentation.
