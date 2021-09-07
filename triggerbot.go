@@ -96,9 +96,7 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 			for k, v := range gossip {
-				if bot.Debug == true {
-					log.Printf("%s: %s", k, v)
-				}
+
 				if gossip[k].match.MatchString(update.Message.Text) {
 					log.Printf("%s", v.text)
 					msg.Text = v.text
