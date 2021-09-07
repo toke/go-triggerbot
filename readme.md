@@ -4,6 +4,13 @@ A Basic Telegram trigger bot.
 Triggers can be configured as [go regular expressions](https://pkg.go.dev/regexp/syntax) in a configuration file.
 Currently only text messages can be triggered.
 
+[![Go](https://github.com/toke/go-triggerbot/actions/workflows/go.yml/badge.svg)](https://github.com/toke/go-triggerbot/actions/workflows/go.yml)
+
+## Compiling
+
+Run 
+'go build -v .'
+
 ## Usage
 
 Use 'config-example.yaml' as a template and place save it as 'config.yml' in the same Directory as the binary.
