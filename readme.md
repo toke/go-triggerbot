@@ -18,7 +18,7 @@ Use `config-example.yaml` as a template and place save it as `config.yml` in the
 A different name and location can be set via the command line parameter *-config*
 
 Make sure to insert The Bot TOKEN into the config file. Use [@BotFather](https://telegram.me/BotFather) to create a bot
-and a TOKEN.
+and a TOKEN. Make sure to disable privacy mode.
 
 ```yaml
 telegram:
@@ -33,7 +33,7 @@ trigger:
     match: "(?i)guten morgen"
     text: "Lass mich weiterschlafen!"
   - # This will match "Die 5 Freunde" but not "Die fünf Freunde"
-    match: "[Dd]ie \d+ Freunde"
+    match: "[Dd]ie \\d+ Freunde"
     text: "... und Timmy der Hund"
 ```
 *NOTE:* The Configuration file uses YAML as format.
