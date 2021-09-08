@@ -5,7 +5,7 @@ telegram:
 # Match syntax https://pkg.go.dev/regexp/syntax
 trigger:
   - match: "WTF?"
-    text: "What the Fuck?"
+    text: "What the Fish?"
   - match: "(?i)guten morgen"
     text: "Nimm Dir nen Kaffee! ☕️"
   - match: "[Dd]ie \\d+ Freunde"
