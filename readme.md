@@ -28,7 +28,7 @@ telegram:
 trigger:
   - # A normal Case sensitive Match
     match: "WTF?"
-    text: "What the Fuck?"
+    text: "What the Fish?"
   - # Case insensitive Match
     match: "(?i)guten morgen"
     text: "Nimm Dir nen Kaffee! ☕️"
