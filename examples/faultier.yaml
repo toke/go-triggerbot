@@ -1,0 +1,40 @@
+telegram:
+  token: ""
+  timeout: 60
+
+# Match syntax https://pkg.go.dev/regexp/syntax
+trigger:
+  - match: "(?i)faultier"
+    text: "Lass uns zusammen rumhängen!"
+  - match: "(?i)guten morgen"
+    percentage: 30
+    text: "Lass mich weiterschlafen!"
+  - match: "😡"
+    text: "*Entspann dich mal, Digga!*"
+  - match: "(?i)schlafen"
+    percentage: 50
+    text: "Schlafen ist mein Lebenssinn."
+  - match: "😠"
+    text: "Chill mal deine Basis!"
+  - match: "(?)besuchen"
+    text: "Ich kann dich schon sehen, bin übermorgen bei dir!"
+  - match: "😴"
+    text: "Ich sehe immer müde aus..."
+  - match: "(?)wach"
+    percentage: 30
+    text: "Kaum wach, schon wieder müde..."
+  - match: "Ast"
+    text: "*EIN KÖNIGREICH FÜR EINEN AST*"
+  - match: "(?)mach ich"
+    text: "Mach ich morgen… in einem Jahr…"
+  - match: "(?)schnell"
+    percentage: 60
+    text: "He! Nicht so schnell Schnecke!"
+  - match: "Sex"
+    text: "_GÄHN!_"
+  - match: "(?)gähn|müde|schlaf|bett"
+    percentage: 60
+    text: "Ich bin auch müde 🥱"
+  - match: "Hunger|Blatt"
+    percentage: 60
+    text: "*Hmmm.. Blätter*"

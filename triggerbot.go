@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"regexp"
 
@@ -12,9 +13,10 @@ import (
 )
 
 type Gossip struct {
-	match     regexp.Regexp
-	text      string
-	parseMode string
+	Match      regexp.Regexp
+	Text       string
+	ParseMode  string
+	Percentage int
 }
 
 type Config struct {
@@ -23,9 +25,10 @@ type Config struct {
 		Timeout int    `yaml:"timeout"`
 	} `yaml:"telegram"`
 	Trigger []struct {
-		Match     string `yaml:"match"`
-		Text      string `yaml:"text"`
-		ParseMode string `yaml:"parseMode"`
+		Match      string `yaml:"match"`
+		Text       string `yaml:"text"`
+		ParseMode  string `yaml:"parseMode"`
+		Percentage int    `yaml:"percentage"`
 	} `yaml:"trigger"`
 }
 
@@ -69,7 +72,10 @@ func main() {
 		if *debugPtr == true {
 			log.Printf("Compile Trigger: \"%s\" \t \"%s\"", cfg.Trigger[k].Match, cfg.Trigger[k].Text)
 		}
-		gossip = append(gossip, Gossip{match: *regexp.MustCompile(cfg.Trigger[k].Match), text: cfg.Trigger[k].Text})
+		gossip = append(gossip, Gossip{
+			Match:      *regexp.MustCompile(cfg.Trigger[k].Match),
+			Text:       cfg.Trigger[k].Text,
+			Percentage: cfg.Trigger[k].Percentage})
 	}
 
 	bot.Debug = *debugPtr
@@ -107,18 +113,20 @@ func main() {
 
 			for k, v := range gossip {
 
-				if gossip[k].match.MatchString(update.Message.Text) {
+				if gossip[k].Match.MatchString(update.Message.Text) {
 					if *debugPtr == true {
-						log.Printf("%s", v.text)
+						log.Printf("%s", v.Text)
 					}
-					msg.Text = v.text
-					if v.parseMode == "" {
+					msg.Text = v.Text
+					if v.ParseMode == "" {
 						msg.ParseMode = "markdown"
 					} else {
-						msg.ParseMode = v.parseMode
+						msg.ParseMode = v.ParseMode
 					}
 					if msg.Text != "" {
-						bot.Send(msg)
+						if v.Percentage > 0 && rand.Intn(100) < v.Percentage {
+							bot.Send(msg)
+						}
 					}
 				}
 			}
