@@ -25,6 +25,14 @@ telegram:
   token: "YOUR BOTTOKEN"
   timeout: 60
 
+limits:
+  - # Allow one request per 5 minutes
+    bucket: 5m
+    limit: 1
+  - # Allow 5 requests per hour
+    bucket: 1h
+    limit: 5
+
 trigger:
   - # A normal Case sensitive Match
     match: "WTF?"
