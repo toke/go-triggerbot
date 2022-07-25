@@ -8,7 +8,7 @@ import (
 	"os"
 	"regexp"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gopkg.in/yaml.v2"
 )
 
@@ -85,7 +85,7 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = cfg.Telegram.Timeout
 
-	updates, err := bot.GetUpdatesChan(u)
+	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
@@ -126,7 +126,9 @@ func main() {
 					if msg.Text != "" {
 						if v.Percentage > 0 && rand.Intn(100) < v.Percentage {
 							bot.Send(msg)
-						}
+						} else if (v.Percentage == 0) {
+                                                    bot.Send(msg)
+                                                }
 					}
 				}
 			}
@@ -134,3 +136,4 @@ func main() {
 		}
 	}
 }
+
