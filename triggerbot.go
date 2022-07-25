@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	"regexp"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gopkg.in/yaml.v2"
@@ -19,11 +20,25 @@ type Gossip struct {
 	Percentage int
 }
 
+type LimitBucket struct {
+	Timeout   time.Duration
+	Timestamp []time.Time
+}
+
+type Limits struct {
+	Bucket []LimitBucket
+}
+
 type Config struct {
 	Telegram struct {
 		Token   string `yaml:"token"`
 		Timeout int    `yaml:"timeout"`
 	} `yaml:"telegram"`
+	Limit []struct {
+		Bucket  string `yaml:"bucket"`
+		Limit   int    `yaml:"limit"`
+		BucketS time.Duration
+	} `yaml:"limits"`
 	Trigger []struct {
 		Match      string `yaml:"match"`
 		Text       string `yaml:"text"`
@@ -51,12 +66,49 @@ func readFile(cfg *Config, filename string) {
 	}
 }
 
+func (limits *Limits) update(cfg *Config) bool {
+	ret := true
+	for l, _ := range limits.Bucket {
+		timeout := cfg.Limit[l].BucketS
+		limit := cfg.Limit[l].Limit
+		limits.Bucket[l].swipe(timeout)
+		if limits.Bucket[l].enforce(limit) == false {
+			ret = false
+		}
+		if ret == true {
+			limits.Bucket[l].Timestamp = append(limits.Bucket[l].Timestamp, time.Now())
+		}
+	}
+	return ret
+}
+
+func (bucket *LimitBucket) swipe(timeout time.Duration) {
+	var tsa []time.Time
+	for t, _ := range bucket.Timestamp {
+		td := bucket.Timestamp[t].Add(bucket.Timeout)
+
+		if time.Now().Before(td) {
+			tsa = append(tsa, bucket.Timestamp[t])
+		}
+	}
+	bucket.Timestamp = tsa
+}
+
+func (bucket *LimitBucket) enforce(limit int) bool {
+	if len(bucket.Timestamp) >= limit {
+		log.Printf("Too many requests in Bucket (%s)", bucket.Timeout.String())
+		return false
+	}
+	return true
+}
+
 func main() {
 	var gossip []Gossip
+	var limit Limits
 	var cfg Config
 
 	var fname string
-	flag.StringVar(&fname, "config", "config.yaml", "Configuration Filename")
+	flag.StringVar(&fname, "config", "triggerbot.yaml", "Configuration Filename")
 	debugPtr := flag.Bool("debug", false, "Debug Output")
 	flag.Parse()
 	fmt.Println("Loading config:", fname)
@@ -76,6 +128,13 @@ func main() {
 			Match:      *regexp.MustCompile(cfg.Trigger[k].Match),
 			Text:       cfg.Trigger[k].Text,
 			Percentage: cfg.Trigger[k].Percentage})
+	}
+	for l, _ := range cfg.Limit {
+		cfg.Limit[l].BucketS, _ = time.ParseDuration(cfg.Limit[l].Bucket)
+		limit.Bucket = append(limit.Bucket, LimitBucket{
+			Timeout: cfg.Limit[l].BucketS,
+		})
+		log.Printf("Bucket: %s", cfg.Limit[l].BucketS.String())
 	}
 
 	bot.Debug = *debugPtr
@@ -125,10 +184,16 @@ func main() {
 					}
 					if msg.Text != "" {
 						if v.Percentage > 0 && rand.Intn(100) < v.Percentage {
-							bot.Send(msg)
-						} else if (v.Percentage == 0) {
-                                                    bot.Send(msg)
-                                                }
+
+							if limit.update(&cfg) {
+								bot.Send(msg)
+							}
+						} else if v.Percentage == 0 {
+
+							if limit.update(&cfg) {
+								bot.Send(msg)
+							}
+						}
 					}
 				}
 			}
@@ -136,4 +201,3 @@ func main() {
 		}
 	}
 }
-

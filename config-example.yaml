@@ -2,6 +2,12 @@ telegram:
   token: ""
   timeout: 60
 
+limits:
+  - bucket: 5m
+    limit: 1
+  - bucket: 1h
+    limit: 5
+    
 # Match syntax https://pkg.go.dev/regexp/syntax
 trigger:
   - match: "WTF?"

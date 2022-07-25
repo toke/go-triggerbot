@@ -14,7 +14,7 @@ Done - proceed withe Section Usage.
 
 ## Usage
 
-Use `config-example.yaml` as a template and place save it as `config.yml` in the same Directory as the binary.
+Use `config-example.yaml` as a template and place save it as `triggerbot.yml` in the same Directory as the binary.
 A different name and location can be set via the command line parameter *-config*
 
 Make sure to insert The Bot TOKEN into the config file. Use [@BotFather](https://telegram.me/BotFather) to create a bot
