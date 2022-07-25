@@ -157,14 +157,7 @@ func main() {
 			Text:       cfg.Trigger[k].Text,
 			Percentage: cfg.Trigger[k].Percentage})
 	}
-	/* for l, _ := range cfg.Limit {
-		cfg.Limit[l].BucketS, _ = time.ParseDuration(cfg.Limit[l].Bucket)
-		limit.Bucket = append(limit.Bucket, LimitBucket{
-			Timeout: cfg.Limit[l].BucketS,
-		})
-		log.Printf("Bucket: %s", cfg.Limit[l].BucketS.String())
-	}
-	*/
+
 	bot.Debug = *debugPtr
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
