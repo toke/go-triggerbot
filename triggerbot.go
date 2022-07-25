@@ -22,11 +22,16 @@ type Gossip struct {
 
 type LimitBucket struct {
 	Timeout   time.Duration
+	Group     int64
 	Timestamp []time.Time
 }
 
-type Limits struct {
+type GroupLimit struct {
 	Bucket []LimitBucket
+}
+
+type Limits struct {
+	GroupLimit map[int64]GroupLimit
 }
 
 type Config struct {
@@ -70,17 +75,35 @@ func readFile(cfg *Config, filename string) {
 	}
 }
 
-func (limits *Limits) update(cfg *Config) bool {
+func (limits *Limits) init(cfg *Config, chatId int64) {
+	gl := make(map[int64]GroupLimit)
+	var lb []LimitBucket
+	for l, _ := range cfg.Limit {
+		to, _ := time.ParseDuration(cfg.Limit[l].Bucket)
+		lb = append(lb, LimitBucket{
+			Timeout: to,
+		})
+	}
+	gl[chatId] = GroupLimit{
+		Bucket: lb,
+	}
+	limits.GroupLimit = gl
+}
+
+func (limits *Limits) update(cfg *Config, chatId int64) bool {
 	ret := true
-	for l, _ := range limits.Bucket {
+	if _, ok := limits.GroupLimit[chatId]; ok == false {
+		limits.init(cfg, chatId)
+	}
+	for l, _ := range limits.GroupLimit[chatId].Bucket {
 		timeout := cfg.Limit[l].BucketS
 		limit := cfg.Limit[l].Limit
-		limits.Bucket[l].swipe(timeout)
-		if limits.Bucket[l].enforce(limit) == false {
+		limits.GroupLimit[chatId].Bucket[l].swipe(timeout)
+		if limits.GroupLimit[chatId].Bucket[l].enforce(limit) == false {
 			ret = false
 		}
 		if ret == true {
-			limits.Bucket[l].Timestamp = append(limits.Bucket[l].Timestamp, time.Now())
+			limits.GroupLimit[chatId].Bucket[l].Timestamp = append(limits.GroupLimit[chatId].Bucket[l].Timestamp, time.Now())
 		}
 	}
 	return ret
@@ -134,14 +157,14 @@ func main() {
 			Text:       cfg.Trigger[k].Text,
 			Percentage: cfg.Trigger[k].Percentage})
 	}
-	for l, _ := range cfg.Limit {
+	/* for l, _ := range cfg.Limit {
 		cfg.Limit[l].BucketS, _ = time.ParseDuration(cfg.Limit[l].Bucket)
 		limit.Bucket = append(limit.Bucket, LimitBucket{
 			Timeout: cfg.Limit[l].BucketS,
 		})
 		log.Printf("Bucket: %s", cfg.Limit[l].BucketS.String())
 	}
-
+	*/
 	bot.Debug = *debugPtr
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -206,12 +229,12 @@ func main() {
 					if msg.Text != "" {
 						if v.Percentage > 0 && rand.Intn(100) < v.Percentage {
 
-							if limit.update(&cfg) {
+							if limit.update(&cfg, update.Message.Chat.ID) {
 								bot.Send(msg)
 							}
 						} else if v.Percentage == 0 {
 
-							if limit.update(&cfg) {
+							if limit.update(&cfg, update.Message.Chat.ID) {
 								bot.Send(msg)
 							}
 						}
