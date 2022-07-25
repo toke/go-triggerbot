@@ -39,6 +39,10 @@ type Config struct {
 		Limit   int    `yaml:"limit"`
 		BucketS time.Duration
 	} `yaml:"limits"`
+	Default struct {
+		ShutupDisabled bool   `yaml:"shutup_disabled"`
+		ShutupTime     string `yaml:"shutup_time"`
+	} `yaml:"defaults"`
 	Trigger []struct {
 		Match      string `yaml:"match"`
 		Text       string `yaml:"text"`
@@ -106,6 +110,7 @@ func main() {
 	var gossip []Gossip
 	var limit Limits
 	var cfg Config
+	var shutupEnd time.Time
 
 	var fname string
 	flag.StringVar(&fname, "config", "triggerbot.yaml", "Configuration Filename")
@@ -159,6 +164,21 @@ func main() {
 			switch update.Message.Command() {
 			case "help":
 				msg.Text = "No Help for this Bot"
+			case "shutup":
+				if cfg.Default.ShutupDisabled {
+					break
+				}
+				var sut time.Duration
+				args := update.Message.CommandArguments()
+				if args == "off" {
+					sut = 0
+				} else if len(args) == 0 {
+					sut, _ = time.ParseDuration(cfg.Default.ShutupTime)
+				} else {
+					sut, _ = time.ParseDuration(args)
+				}
+				shutupEnd = time.Now().Add(sut)
+				log.Printf("Shut up for %s requested by %s [%d]", sut.String(), update.Message.From.String(), update.Message.From.ID)
 			default:
 				log.Printf("Unknown command: %s", update.Message.Command())
 				//msg.Text = "I don't know that command"
@@ -167,9 +187,10 @@ func main() {
 				bot.Send(msg)
 			}
 		} else {
-
+			if shutupEnd.After(time.Now()) {
+				continue
+			}
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-
 			for k, v := range gossip {
 
 				if gossip[k].Match.MatchString(update.Message.Text) {
